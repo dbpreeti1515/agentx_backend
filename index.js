@@ -5,7 +5,9 @@ const http = require("http");
 const { Server } = require("socket.io");
 const { connectDB } = require("./src/db/connect");
 const agentRoutes = require("./src/routes/agentRoutes");
+const authRoutes = require("./src/routes/authRoutes");
 const copilotRoutes = require("./src/routes/copilotRoutes");
+const meetingRoutes = require("./src/routes/meetingRoutes");
 const { errorHandler, notFoundHandler } = require("./src/middleware/errorHandler");
 const logger = require("./src/services/logger");
 const { initializeSocket } = require("./src/services/socketService");
@@ -25,8 +27,10 @@ app.get("/health", (_req, res) => {
   res.json({ success: true, data: { ok: true, service: "agentx-backend" } });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/agent", agentRoutes);
 app.use("/api/copilot", copilotRoutes);
+app.use("/api/meeting", meetingRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

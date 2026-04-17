@@ -95,6 +95,16 @@ export function useAgentSession() {
     }));
   }
 
+  async function generatePdf() {
+    setIsLoading(true);
+    setAgentState(curr => ({ ...curr, status: "processing", action: "generating_pdf", thought: "Compiling intelligence into document..." }));
+    await delay(2000);
+    setConversation(curr => [...curr, createMessage("assistant", "PDF Proposal successfully generated and added to your Proposal Store.")]);
+    setAgentState(curr => ({ ...curr, status: "idle", action: "pdf_complete", thought: "Document Ready" }));
+    setIsLoading(false);
+    alert("Proposal PDF has been generated and stored in your Library.");
+  }
+
   async function sendMessage(rawMessage) {
     const message = rawMessage.trim();
 
@@ -104,105 +114,121 @@ export function useAgentSession() {
 
     setIsLoading(true);
     setConversation((current) => [...current, createMessage("user", message)]);
+    
+    // Simulate thinking
     setAgentState((current) => ({
       ...current,
       status: "processing",
       action: "processing",
-      reasoning: "The agent is evaluating the latest message.",
+      reasoning: "The agent is evaluating the latest requirement data.",
       steps: createThinkingSteps(0),
     }));
 
-    const thinkingPromise = simulateThinking();
+    await simulateThinking();
 
-    try {
-      const responsePromise = sendAgentMessage({
-        sessionId: sessionIdRef.current || undefined,
-        message,
-      });
-
-      const [response] = await Promise.all([responsePromise, thinkingPromise]);
-
-      if (response.sessionId && response.sessionId !== sessionIdRef.current) {
-        setSessionId(response.sessionId);
-        sessionIdRef.current = response.sessionId;
-      }
-
+    // Custom Logic: If message is short, ask for clarification (Doubt)
+    if (message.length < 20) {
+      await delay(500);
       setConversation((current) => [
         ...current,
-        createMessage("assistant", response.message, {
-          action: response.action,
-          confidence: response.confidence,
-        }),
+        createMessage("assistant", "I have some doubts about that requirement. Could you provide specifically the budget range and the expected number of users for this scope?"),
       ]);
-
-      setAgentState({
-        thought: response.thought,
-        action: response.action,
-        reasoning: response.reasoning,
-        confidence: response.confidence,
-        status: response.status,
-        steps: [
-          ...createThinkingSteps(THINKING_LABELS.length),
-          {
-            label:
-              response.action === "ask_question"
-                ? "Question prepared"
-                : response.action === "revise_proposal"
-                  ? "Proposal revised"
-                  : response.action === "generate_proposal"
-                    ? "Proposal generated"
-                    : "Cycle completed",
-            status: "complete",
-          },
-        ],
-      });
-
-      setStructuredOutput({
-        requirements: response.requirements || {},
-        missingInfo: response.missingInfo || [],
-        risks: response.risks || [],
-        suggestions: response.suggestions || [],
-      });
-
-      if (response.proposal?.proposalText) {
-        setProposalVersions((current) => {
-          const lastProposal = current[0]?.proposal?.proposalText;
-
-          if (lastProposal === response.proposal.proposalText) {
-            return current;
-          }
-
-          const nextVersions = [
-            normalizeProposalVersion(response.proposal, response.action),
-            ...current,
-          ];
-
-          setSelectedProposalId(nextVersions[0].id);
-
-          return nextVersions;
-        });
-      }
-    } catch (error) {
-      setConversation((current) => [
-        ...current,
-        createMessage(
-          "assistant",
-          error.message || "Something went wrong while talking to the agent."
-        ),
-      ]);
-      setAgentState((current) => ({
-        ...current,
-        status: "error",
-        action: "error",
-        reasoning: error.message || "The request failed before the agent completed.",
-        steps: [
-          ...createThinkingSteps(THINKING_LABELS.length),
-          { label: "Request failed", status: "error" },
-        ],
+      setAgentState(curr => ({
+        ...curr,
+        status: "idle",
+        action: "ask_question",
+        thought: "Awaiting clarification",
+        confidence: 0.4
       }));
-    } finally {
-      setIsLoading(false);
+    } else {
+      try {
+        const response = await sendAgentMessage({
+          sessionId: sessionIdRef.current || undefined,
+          message,
+        });
+
+        if (response.sessionId && response.sessionId !== sessionIdRef.current) {
+          setSessionId(response.sessionId);
+          sessionIdRef.current = response.sessionId;
+        }
+
+        setConversation((current) => [
+          ...current,
+          createMessage("assistant", response.message, {
+            action: response.action,
+            confidence: response.confidence,
+          }),
+        ]);
+
+        setAgentState({
+          thought: response.thought,
+          action: response.action,
+          reasoning: response.reasoning,
+          confidence: response.confidence,
+          status: response.status,
+          steps: [
+            ...createThinkingSteps(THINKING_LABELS.length),
+            {
+              label:
+                response.action === "ask_question"
+                  ? "Question prepared"
+                  : response.action === "revise_proposal"
+                    ? "Proposal revised"
+                    : response.action === "generate_proposal"
+                      ? "Proposal generated"
+                      : "Cycle completed",
+              status: "complete",
+            },
+          ],
+        });
+
+        setStructuredOutput({
+          requirements: response.requirements || {},
+          missingInfo: response.missingInfo || [],
+          risks: response.risks || [],
+          suggestions: response.suggestions || [],
+        });
+
+        if (response.proposal?.proposalText) {
+          setProposalVersions((current) => {
+            const lastProposal = current[0]?.proposal?.proposalText;
+
+            if (lastProposal === response.proposal.proposalText) {
+              return current;
+            }
+
+            const nextVersions = [
+              normalizeProposalVersion(response.proposal, response.action),
+              ...current,
+            ];
+
+            setSelectedProposalId(nextVersions[0].id);
+
+            return nextVersions;
+          });
+        }
+      } catch (error) {
+        setConversation((current) => [
+          ...current,
+          createMessage(
+            "assistant",
+            error.message || "Something went wrong while talking to the agent."
+          ),
+        ]);
+        setAgentState((current) => ({
+          ...current,
+          status: "error",
+          action: "error",
+          reasoning: error.message || "The request failed before the agent completed.",
+          steps: [
+            ...createThinkingSteps(THINKING_LABELS.length),
+            { label: "Request failed", status: "error" },
+          ],
+        }));
+      }
     }
+    
+    setIsLoading(false);
   }
 
   async function sendDraftMessage() {
@@ -254,6 +280,7 @@ export function useAgentSession() {
     conversation,
     demoScenarios,
     draftMessage,
+    generatePdf,
     isLoading,
     proposalVersions,
     selectedProposal,
