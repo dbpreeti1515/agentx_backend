@@ -1,57 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AgentBrainPanel } from "./components/AgentBrainPanel";
 import { ChatPanel } from "./components/ChatPanel";
 import { DemoScenarioBar } from "./components/DemoScenarioBar";
 import { MeetingRoom } from "./components/MeetingRoom";
 import { OutputPanel } from "./components/OutputPanel";
+import { LandingPage } from "./components/LandingPage";
+import { ThemeToggle } from "./components/ThemeToggle";
 import { useAgentSession } from "./hooks/useAgentSession";
 
 function App() {
-  const [activeView, setActiveView] = useState("dashboard");
+  const [activeView, setActiveView] = useState("landing");
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("agentx-theme") || "light";
+  });
+  
   const agentSession = useAgentSession();
 
-  if (activeView === "meeting-room") {
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("agentx-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => (t === "light" ? "dark" : "light"));
+
+  if (activeView === "landing") {
     return (
-      <div className="app-shell">
-        <nav className="view-switcher">
-          <button
-            type="button"
-            className="view-switcher__button"
-            onClick={() => setActiveView("dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            type="button"
-            className="view-switcher__button view-switcher__button--active"
-            onClick={() => setActiveView("meeting-room")}
-          >
-            MeetingRoom
-          </button>
-        </nav>
-        <MeetingRoom />
+      <div className={`theme-provider theme-provider--${theme}`}>
+        <LandingPage 
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onLaunchDashboard={() => setActiveView("dashboard")}
+          onJoinMeeting={() => setActiveView("meeting-room")}
+        />
       </div>
     );
   }
 
-  return (
-    <div className="app-shell">
-      <nav className="view-switcher">
+  const commonNav = (
+    <nav className="view-switcher">
+      <div className="view-switcher__left">
         <button
           type="button"
-          className="view-switcher__button view-switcher__button--active"
+          className={`view-switcher__button ${activeView === "landing" ? "view-switcher__button--active" : ""}`}
+          onClick={() => setActiveView("landing")}
+        >
+          Landing
+        </button>
+        <button
+          type="button"
+          className={`view-switcher__button ${activeView === "dashboard" ? "view-switcher__button--active" : ""}`}
           onClick={() => setActiveView("dashboard")}
         >
           Dashboard
         </button>
         <button
           type="button"
-          className="view-switcher__button"
+          className={`view-switcher__button ${activeView === "meeting-room" ? "view-switcher__button--active" : ""}`}
           onClick={() => setActiveView("meeting-room")}
         >
           MeetingRoom
         </button>
-      </nav>
+      </div>
+      <ThemeToggle theme={theme} onToggle={toggleTheme} />
+    </nav>
+  );
+
+  if (activeView === "meeting-room") {
+    return (
+      <div className={`app-shell theme-provider--${theme}`}>
+        {commonNav}
+        <MeetingRoom />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`app-shell theme-provider--${theme}`}>
+      {commonNav}
       <header className="topbar">
         <div>
           <p className="eyebrow">AgentX Dashboard</p>

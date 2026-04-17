@@ -27,23 +27,37 @@ function ListBlock({ title, items, emptyText }) {
   );
 }
 
-export function CopilotPanel({ copilotState, isLoading, sessionId }) {
+export function CopilotPanel({ copilotState, isLoading, sessionId, onUseSuggestion }) {
   return (
     <section className="panel panel--copilot">
       <div className="panel-header">
         <div>
-          <p className="eyebrow">Copilot Panel</p>
-          <h2>Real-time guidance</h2>
+          <p className="eyebrow">Copilot Guidance</p>
+          <h2>Real-time insights</h2>
         </div>
         <CopilotConfidence confidence={copilotState.confidence} />
       </div>
 
       <div className="brain-card action-card">
         <div className="action-pill">{copilotState.action}</div>
-        <p className="brain-label">Thought</p>
+        <p className="brain-label">AI Thought Process</p>
         <h3>{copilotState.thought}</h3>
-        <p className="brain-label">Suggested next question</p>
-        <p className="brain-copy">{copilotState.suggestion}</p>
+        
+        <div className="suggestion-block">
+          <div>
+            <p className="brain-label">Suggested next question</p>
+            <p className="brain-copy">{copilotState.suggestion}</p>
+          </div>
+          {onUseSuggestion && copilotState.suggestion && (
+            <button 
+              className="use-suggestion-btn"
+              onClick={() => onUseSuggestion(copilotState.suggestion)}
+            >
+              Use Question
+            </button>
+          )}
+        </div>
+
         <div className="status-row">
           <span className={`status-indicator status-indicator--${isLoading ? "processing" : "completed"}`}>
             {isLoading ? "Copilot thinking" : sessionId || "No active session"}
