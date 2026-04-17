@@ -1,0 +1,539 @@
+:root {
+  font-family: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+  color: #122033;
+  background:
+    radial-gradient(circle at top right, rgba(99, 154, 255, 0.16), transparent 24%),
+    linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #122033;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.view-switcher {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.view-switcher__button,
+.role-toggle__button {
+  border: 1px solid rgba(21, 57, 107, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  color: #15396b;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.view-switcher__button--active,
+.role-toggle__button--active {
+  background: #15396b;
+  color: white;
+}
+
+.topbar,
+.scenario-bar,
+.panel,
+.brain-card,
+.scenario-button,
+.mini-card {
+  border: 1px solid rgba(18, 32, 51, 0.08);
+  box-shadow: 0 16px 40px rgba(18, 32, 51, 0.06);
+}
+
+.topbar,
+.scenario-bar,
+.panel,
+.brain-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+}
+
+.topbar {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.topbar h1,
+.scenario-bar h2,
+.panel-header h2,
+.proposal-body h3,
+.brain-card h3 {
+  margin: 0;
+}
+
+.subtitle {
+  max-width: 720px;
+  margin: 10px 0 0;
+  color: #5d6b7e;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #4f80d9;
+}
+
+.session-chip {
+  min-width: 220px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #eff5ff;
+}
+
+.session-chip span {
+  display: block;
+  color: #5d6b7e;
+  font-size: 0.82rem;
+}
+
+.scenario-bar {
+  margin-top: 18px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.scenario-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.scenario-button {
+  max-width: 270px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(79, 128, 217, 0.18);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.scenario-button--active,
+.scenario-button:hover:not(:disabled) {
+  border-color: #4f80d9;
+  background: #eef4ff;
+}
+
+.scenario-button span {
+  color: #5d6b7e;
+  font-size: 0.9rem;
+}
+
+.dashboard-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr 1.1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.meeting-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  min-height: 760px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.panel--brain {
+  background:
+    linear-gradient(180deg, rgba(238, 244, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.chat-feed,
+.output-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chat-feed {
+  flex: 1;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.chat-bubble {
+  max-width: 92%;
+  padding: 14px 16px;
+  border-radius: 20px;
+}
+
+.chat-bubble--assistant {
+  background: #f5f7fb;
+  align-self: flex-start;
+}
+
+.chat-bubble--user {
+  background: #dbe8ff;
+  align-self: flex-end;
+}
+
+.chat-bubble--client {
+  background: #fff4df;
+  align-self: flex-start;
+}
+
+.chat-bubble--sales {
+  background: #dbe8ff;
+  align-self: flex-end;
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: #5d6b7e;
+}
+
+.chat-tag,
+.action-pill,
+.chip,
+.status-indicator,
+.proposal-tab {
+  border-radius: 999px;
+}
+
+.chat-tag,
+.chip {
+  padding: 4px 9px;
+  background: #edf4ff;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.composer textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  border-radius: 18px;
+  border: 1px solid rgba(18, 32, 51, 0.12);
+  padding: 14px 16px;
+  background: #fbfcff;
+}
+
+.composer button,
+.proposal-tab {
+  border: none;
+  cursor: pointer;
+}
+
+.composer button {
+  align-self: flex-end;
+  background: #15396b;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 14px;
+}
+
+.composer button:disabled,
+.scenario-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.brain-card {
+  padding: 18px;
+}
+
+.action-card {
+  background: linear-gradient(180deg, #15396b 0%, #1f4c8f 100%);
+  color: white;
+}
+
+.action-pill {
+  display: inline-flex;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.18);
+  text-transform: capitalize;
+  margin-bottom: 14px;
+}
+
+.brain-label {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  color: #5d6b7e;
+}
+
+.action-card .brain-label,
+.action-card .brain-copy {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.brain-copy {
+  margin: 0;
+}
+
+.brain-label--space {
+  margin-top: 16px;
+}
+
+.confidence {
+  min-width: 116px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  text-align: center;
+}
+
+.confidence span {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.confidence--high {
+  background: #e4f7eb;
+  color: #11693f;
+}
+
+.confidence--medium {
+  background: #fff2dc;
+  color: #8a5f12;
+}
+
+.confidence--low {
+  background: #fde7e8;
+  color: #9d2830;
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f6f8fb;
+}
+
+.step-item--active {
+  background: #dfeaff;
+}
+
+.step-item--error {
+  background: #ffe7e8;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #8ca6cf;
+}
+
+.step-item--complete .step-dot {
+  background: #1b7c47;
+}
+
+.step-item--active .step-dot {
+  background: #2e63b8;
+}
+
+.step-item--error .step-dot {
+  background: #c43441;
+}
+
+.status-row {
+  margin-top: 18px;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.status-indicator--completed,
+.status-indicator--proposal_generated {
+  background: #e4f7eb;
+  color: #11693f;
+}
+
+.status-indicator--processing,
+.status-indicator--waiting_for_user,
+.status-indicator--demo,
+.status-indicator--idle {
+  background: #edf4ff;
+  color: #214f94;
+}
+
+.status-indicator--error {
+  background: #fde7e8;
+  color: #9d2830;
+}
+
+.requirement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mini-card {
+  padding: 14px;
+  border-radius: 18px;
+  background: #fcfdff;
+}
+
+.mini-card__label {
+  margin: 0 0 8px;
+  color: #5d6b7e;
+  text-transform: capitalize;
+}
+
+.mini-card__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bullet-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.empty-state,
+.muted {
+  color: #728093;
+}
+
+.proposal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.proposal-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.proposal-tab {
+  padding: 8px 12px;
+  background: #f0f4fb;
+}
+
+.proposal-tab--active {
+  background: #15396b;
+  color: white;
+}
+
+.proposal-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  background: #f7f9fc;
+  padding: 14px;
+  border-radius: 18px;
+  overflow: auto;
+}
+
+.panel--meeting,
+.panel--copilot {
+  min-height: 780px;
+}
+
+.speaker-label {
+  text-transform: capitalize;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meeting-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    min-height: auto;
+  }
+
+  .scenario-bar,
+  .topbar {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 16px;
+  }
+
+  .requirement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-header,
+  .panel-header {
+    flex-direction: column;
+  }
+}

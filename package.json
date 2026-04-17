@@ -1,0 +1,31 @@
+{
+  "name": "agentx-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "client:dev": "npm --prefix frontend run dev",
+    "client:build": "npm --prefix frontend run build",
+    "test": "node -e \"console.log('No tests configured')\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/db-ketanthombare/agentX-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/db-ketanthombare/agentX-backend/issues"
+  },
+  "homepage": "https://github.com/db-ketanthombare/agentX-backend#readme",
+  "dependencies": {
+    "axios": "^1.15.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.4.1"
+  }
+}
