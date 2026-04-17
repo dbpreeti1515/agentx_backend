@@ -54,6 +54,40 @@ export async function createMeeting(payload = {}) {
   return data.data;
 }
 
+export async function listMeetings({ status } = {}) {
+  const params = new URLSearchParams();
+  if (status) {
+    params.set("status", status);
+  }
+  const query = params.toString();
+  const response = await fetch(
+    `${API_BASE_URL}/api/meeting/list${query ? `?${query}` : ""}`
+  );
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data?.error?.message || "Failed to list meetings");
+  }
+
+  return data.data;
+}
+
+export async function startMeeting(meetingId) {
+  const response = await fetch(`${API_BASE_URL}/api/meeting/${meetingId}/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data?.error?.message || "Failed to start meeting");
+  }
+
+  return data.data;
+}
+
 export async function sendMeetingMessage(payload) {
   const response = await fetch(`${API_BASE_URL}/api/meeting/message`, {
     method: "POST",
