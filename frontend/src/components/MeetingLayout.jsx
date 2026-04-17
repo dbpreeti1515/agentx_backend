@@ -30,6 +30,7 @@ export const MeetingLayout = ({
 }) => {
   return (
     <div className="flex flex-col h-screen bg-slate-950 font-sans overflow-hidden text-white">
+      
       {/* Top Header */}
       <header className="h-16 px-6 flex items-center justify-between bg-black/20 backdrop-blur-md absolute top-0 left-0 right-0 z-50">
         <div className="flex items-center gap-4">

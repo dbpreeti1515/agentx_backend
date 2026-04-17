@@ -4,6 +4,7 @@ import { ChatPanel } from "./components/ChatPanel";
 import { ClientMeetingPage } from "./components/ClientMeetingPage";
 import { DemoScenarioBar } from "./components/DemoScenarioBar";
 import { MeetingLaunchCard } from "./components/MeetingLaunchCard";
+import { MeetingLayout } from "./components/MeetingLayout";
 import { OutputPanel } from "./components/OutputPanel";
 import { SalesMeetingPage } from "./components/SalesMeetingPage";
 import { useAgentSession } from "./hooks/useAgentSession";
@@ -12,7 +13,7 @@ import { createMeeting } from "./services/agentApi";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { LandingPage } from "./components/LandingPage";
 import { LoginPage } from "./components/LoginPage";
-import { motion } from "framer-motion";
+import { Bot } from "lucide-react";
 
 function AuthGuard({ children, navigate }) {
   const token = localStorage.getItem("auth_token");
@@ -33,6 +34,10 @@ function DashboardHome({ navigate }) {
   const [isCreatingMeeting, setIsCreatingMeeting] = useState(false);
   const [meetingError, setMeetingError] = useState("");
   const [latestJoinLink, setLatestJoinLink] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [showChat, setShowChat] = useState(false);
+  const [showIntelligence, setShowIntelligence] = useState(true);
 
   const handleLogout = () => {
     localStorage.removeItem("auth_token");
@@ -98,27 +103,6 @@ function DashboardHome({ navigate }) {
           </div>
         );
 
-      case "meetings":
-        return (
-          <div className="max-w-4xl mx-auto space-y-12 py-12">
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-2xl shadow-indigo-200">
-                <Video size={40} />
-              </div>
-              <h2 className="text-4xl font-black text-slate-900 tracking-tight">Meeting Command</h2>
-              <p className="text-slate-500 font-medium max-w-lg mx-auto">
-                Launch high-conversion sales meetings with your AI copilot ready to assist in real-time.
-              </p>
-            </div>
-            <MeetingLaunchCard
-              creating={isCreatingMeeting}
-              error={meetingError}
-              joinLink={latestJoinLink}
-              onCreateMeeting={handleCreateMeeting}
-            />
-          </div>
-        );
-
       case "targets": // Re-purposing for System/Process for now
         return (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -157,6 +141,33 @@ function DashboardHome({ navigate }) {
         );
     }
   };
+
+  if (activeTab === "meetings") {
+    return (
+      <MeetingLayout
+        title="Meeting Command"
+        participantCount={1}
+        onLeave={() => setActiveTab("discovery")}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        isCameraOn={isCameraOn}
+        setIsCameraOn={setIsCameraOn}
+        showChat={showChat}
+        setShowChat={setShowChat}
+        showIntelligence={showIntelligence}
+        setShowIntelligence={setShowIntelligence}
+      >
+        <div className="w-full max-w-4xl">
+          <MeetingLaunchCard
+            creating={isCreatingMeeting}
+            error={meetingError}
+            joinLink={latestJoinLink}
+            onCreateMeeting={handleCreateMeeting}
+          />
+        </div>
+      </MeetingLayout>
+    );
+  }
 
   return (
     <DashboardLayout 
