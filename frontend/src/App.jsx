@@ -6,6 +6,8 @@ import { DemoScenarioBar } from "./components/DemoScenarioBar";
 import { MeetingLaunchCard } from "./components/MeetingLaunchCard";
 import { MeetingLayout } from "./components/MeetingLayout";
 import { OutputPanel } from "./components/OutputPanel";
+import { ProposalStorePage } from "./components/ProposalStorePage";
+import { SalesProspectsPage } from "./components/SalesProspectsPage";
 import { SalesMeetingPage } from "./components/SalesMeetingPage";
 import { useAgentSession } from "./hooks/useAgentSession";
 import { useAppRoute } from "./hooks/useAppRoute";
@@ -131,6 +133,18 @@ function DashboardHome({ navigate }) {
             </div>
           </div>
         );
+
+      case "library":
+        return (
+          <ProposalStorePage
+            proposalVersions={agentSession.proposalVersions}
+            selectedProposalId={agentSession.selectedProposalId}
+            onSelectProposal={agentSession.setSelectedProposalId}
+          />
+        );
+
+      case "prospects":
+        return <SalesProspectsPage conversation={agentSession.conversation} />;
 
       default:
         return (
