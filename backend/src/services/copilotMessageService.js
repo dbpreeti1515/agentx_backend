@@ -4,6 +4,43 @@ const { AppError } = require("./errors");
 const logger = require("./logger");
 const { runCopilotLoop } = require("../agent/copilotEngine");
 
+function normalizeConversationSnapshot(snapshot = []) {
+  if (!Array.isArray(snapshot)) {
+    return [];
+  }
+
+  return snapshot
+    .slice(-30)
+    .map((item) => {
+      const rawRole = typeof item?.role === "string" ? item.role.trim().toLowerCase() : "";
+      const role = ["assistant", "system", "sales", "client", "user"].includes(rawRole)
+        ? rawRole
+        : "user";
+      const content = typeof item?.content === "string" ? item.content.trim() : "";
+      const speaker =
+        typeof item?.speaker === "string" && item.speaker.trim()
+          ? item.speaker.trim().toLowerCase()
+          : role === "client" || role === "sales"
+            ? role
+            : role;
+      const createdAt = item?.createdAt ? new Date(item.createdAt) : new Date();
+
+      return {
+        role,
+        content,
+        step: "meeting_context",
+        metadata: {
+          speaker,
+          sourceRole: role,
+          mode: "copilot",
+          source: "meeting_snapshot",
+        },
+        createdAt: Number.isNaN(createdAt.getTime()) ? new Date() : createdAt,
+      };
+    })
+    .filter((item) => item.content);
+}
+
 async function processCopilotMessage(payload) {
   const role = typeof payload.role === "string" ? payload.role.trim().toLowerCase() : "";
   const message = typeof payload.message === "string" ? payload.message.trim() : "";
@@ -26,6 +63,13 @@ async function processCopilotMessage(payload) {
 
   const sessionId = payload.sessionId || randomUUID();
   let session = await sessionRepository.getOrCreateSession(sessionId);
+  const normalizedSnapshot = normalizeConversationSnapshot(payload.conversationSnapshot);
+
+  if (normalizedSnapshot.length) {
+    session = await sessionRepository.updateSessionFields(sessionId, {
+      messages: normalizedSnapshot,
+    });
+  }
 
   session = await sessionRepository.appendMessage(sessionId, {
     role: "user",
@@ -53,6 +97,7 @@ async function processCopilotMessage(payload) {
     sessionId,
     speaker: role,
     messageLength: message.length,
+    snapshotTurns: normalizedSnapshot.length,
   });
 
   const result = await runCopilotLoop(session);

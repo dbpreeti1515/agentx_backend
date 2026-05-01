@@ -107,6 +107,11 @@ async function identifyGaps({ requirements, messages }) {
   const result = await callStructuredLLM({
     prompt,
     fallback: () => deterministicGapCheck(requirements, messages),
+    retries: 0,
+    options: {
+      maxRetries: 0,
+      maxTokens: 700,
+    },
     validate: (payload) =>
       validateKeys(payload, [
         "missingRequirements",

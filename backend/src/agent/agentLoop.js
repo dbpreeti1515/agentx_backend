@@ -134,7 +134,7 @@ async function runAgentLoop(session) {
         reasoning: decisionResult.decision.reasoning,
         confidence: decisionResult.decision.confidence,
         message:
-          "I need a bit more concrete information before I can take the next step confidently.",
+          "I can proceed with assumptions now, but I need one concrete clarification to improve proposal precision.",
         proposal: session.proposal,
         session,
         iterations: iterationLogs,
@@ -193,7 +193,7 @@ async function runAgentLoop(session) {
             "The next clarification question would repeat a previous prompt, so the loop is stopping safely.",
           confidence: decisionResult.decision.confidence,
           message:
-            "I need more concrete project detail before I can continue without repeating myself.",
+            "I can draft using assumptions, but I need one additional concrete detail to avoid repeating questions.",
           proposal: session.proposal,
           session,
           iterations: iterationLogs,
@@ -351,7 +351,7 @@ async function runAgentLoop(session) {
       "The agent could not generate a proposal or a new clarifying question within the configured iteration budget.",
     confidence: session.agentState.confidence || 0,
     message:
-      "I need a bit more information before I can continue. Could you share more detail about the project goals, deliverables, and timeline?",
+      "I can proceed with an assumptions-based proposal now. Share any additional goals, deliverables, or timeline details if you want higher precision.",
     session,
     iterations: iterationLogs,
   };

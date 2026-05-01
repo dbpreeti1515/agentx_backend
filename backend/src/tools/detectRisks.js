@@ -58,6 +58,11 @@ async function detectRisks({ requirements, messages }) {
   const result = await callStructuredLLM({
     prompt,
     fallback: () => buildDeterministicRisks(requirements, messages),
+    retries: 0,
+    options: {
+      maxRetries: 0,
+      maxTokens: 650,
+    },
     validate: (payload) =>
       validateKeys(payload, [
         "risks",

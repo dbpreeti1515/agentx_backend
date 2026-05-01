@@ -50,6 +50,11 @@ async function generateSalesSuggestions({
         risks,
         action: recommendedAction,
       }),
+    retries: 0,
+    options: {
+      maxRetries: 0,
+      maxTokens: 600,
+    },
     validate: (payload) =>
       validateKeys(payload, ["suggestedQuestion", "coachingTips", "rationale"]),
   });

@@ -1,30 +1,9 @@
-import { useMemo, useState } from "react";
-import { useMeetingSession } from "../hooks/useMeetingSession";
+import { useState } from "react";
+import { MeetingRoom } from "./MeetingRoom";
 
 export function ClientMeetingPage({ meetingId }) {
   const [participantName, setParticipantName] = useState("");
-  const [draftMessage, setDraftMessage] = useState("");
   const [joinedName, setJoinedName] = useState("");
-
-  const enabled = useMemo(() => Boolean(meetingId && joinedName), [joinedName, meetingId]);
-
-  const meetingSession = useMeetingSession({
-    meetingId,
-    role: "client",
-    participantName: joinedName,
-    enabled,
-  });
-
-  async function handleSend(event) {
-    event.preventDefault();
-
-    if (!draftMessage.trim()) {
-      return;
-    }
-
-    await meetingSession.postMessage(draftMessage);
-    setDraftMessage("");
-  }
 
   if (!joinedName) {
     return (
@@ -46,11 +25,11 @@ export function ClientMeetingPage({ meetingId }) {
               }
             }}
           >
-            <textarea
+            <input
               value={participantName}
               onChange={(event) => setParticipantName(event.target.value)}
               placeholder="Your name"
-              rows={2}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
             />
             <button type="submit" disabled={!participantName.trim()}>
               Join meeting
@@ -62,57 +41,11 @@ export function ClientMeetingPage({ meetingId }) {
   }
 
   return (
-    <div className="client-join-shell">
-      <section className="panel panel--meeting client-panel">
-        <div className="panel-header">
-          <div>
-            <p className="eyebrow">Meeting</p>
-            <h2>Conversation</h2>
-          </div>
-          <div className="session-chip">
-            <span>You joined as</span>
-            <strong>{joinedName}</strong>
-          </div>
-        </div>
-
-        <div className="chat-feed">
-          {(meetingSession.meetingState?.messages || []).map((message, index) => (
-            <article
-              key={`${message.role}-${message.createdAt || index}`}
-              className={`chat-bubble ${
-                message.role === "sales" ? "chat-bubble--sales" : "chat-bubble--client"
-              }`}
-            >
-              <div className="chat-meta">
-                <span className="speaker-label">
-                  {message.metadata?.senderName || message.role}
-                </span>
-              </div>
-              <p>{message.content}</p>
-            </article>
-          ))}
-        </div>
-
-        <form className="composer" onSubmit={handleSend}>
-          <textarea
-            value={draftMessage}
-            onChange={(event) => setDraftMessage(event.target.value)}
-            placeholder="Write your message..."
-            rows={4}
-            disabled={meetingSession.isSending}
-          />
-          <button
-            type="submit"
-            disabled={meetingSession.isSending || !draftMessage.trim()}
-          >
-            {meetingSession.isSending ? "Sending..." : "Send"}
-          </button>
-        </form>
-
-        {meetingSession.error ? (
-          <p className="auth-error">{meetingSession.error}</p>
-        ) : null}
-      </section>
-    </div>
+    <MeetingRoom
+      meetingId={meetingId}
+      initialRole="client"
+      participantName={joinedName}
+      allowRoleSwitch={false}
+    />
   );
 }

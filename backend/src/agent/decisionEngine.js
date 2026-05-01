@@ -29,6 +29,7 @@ function deterministicDecision({
   const noIterationsLeft = iteration >= maxIterations;
   const confidence = calculateConfidence(requirements, gaps);
   const hasMissingInfo = (gaps.missingInfo?.length || 0) > 0;
+  const missingRequirementCount = (gaps.missingRequirements?.length || 0);
   const budgetConflict = Boolean(gaps.budgetConflict);
 
   if (!hasRequirements(requirements)) {
@@ -55,24 +56,36 @@ function deterministicDecision({
     };
   }
 
-  if (!noIterationsLeft && hasMissingInfo && !gaps.readyForProposal) {
+  if (
+    !noIterationsLeft &&
+    !proposal &&
+    hasMissingInfo &&
+    confidence < 45 &&
+    iteration <= 1 &&
+    missingRequirementCount >= 3
+  ) {
     return {
-      thought: "Key details are still missing, so clarification is the highest-value next step.",
+      thought:
+        "A quick clarification now will materially improve proposal quality before drafting.",
       action: "ask_question",
-      reasoning: "Important information is still missing before proposal generation.",
+      reasoning:
+        "Only ask early when confidence is low and core requirement gaps are still broad.",
       confidence,
       readyForProposal: false,
       stop: false,
     };
   }
 
-  if (confidence >= 72 || gaps.readyForProposal || noIterationsLeft) {
+  if (confidence >= 55 || gaps.readyForProposal || noIterationsLeft || hasMissingInfo) {
     return {
-      thought: "The brief is strong enough to generate a commercially useful proposal.",
+      thought:
+        "There is enough context to produce a commercially useful proposal with explicit assumptions.",
       action: "generate_proposal",
       reasoning: noIterationsLeft
         ? "The iteration limit was reached, so the agent should produce the best available proposal."
-        : "Confidence is above the proposal threshold.",
+        : hasMissingInfo
+          ? "Proceed with assumptions and list open items instead of blocking for perfect clarity."
+          : "Confidence is above the proposal threshold.",
       confidence,
       readyForProposal: true,
       stop: false,

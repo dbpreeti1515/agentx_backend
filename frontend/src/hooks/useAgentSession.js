@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { sendAgentMessage } from "../services/agentApi";
 import { demoScenarios } from "../utils/demoScenarios";
+import { buildProposalPdf } from "../utils/proposalPdf";
+import { loadStoredProposals, upsertStoredProposal } from "../utils/proposalStore";
 
 const THINKING_LABELS = [
   "Analyzing input...",
@@ -69,7 +71,7 @@ export function useAgentSession() {
     risks: [],
     suggestions: [],
   });
-  const [proposalVersions, setProposalVersions] = useState([]);
+  const [proposalVersions, setProposalVersions] = useState(() => loadStoredProposals());
   const [selectedProposalId, setSelectedProposalId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeScenario, setActiveScenario] = useState("");
@@ -96,13 +98,80 @@ export function useAgentSession() {
   }
 
   async function generatePdf() {
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
-    setAgentState(curr => ({ ...curr, status: "processing", action: "generating_pdf", thought: "Compiling intelligence into document..." }));
-    await delay(2000);
-    setConversation(curr => [...curr, createMessage("assistant", "PDF Proposal successfully generated and added to your Proposal Store.")]);
-    setAgentState(curr => ({ ...curr, status: "idle", action: "pdf_complete", thought: "Document Ready" }));
-    setIsLoading(false);
-    alert("Proposal PDF has been generated and stored in your Library.");
+    setAgentState((curr) => ({
+      ...curr,
+      status: "processing",
+      action: "generating_pdf",
+      thought: "Compiling intelligence into proposal deck...",
+    }));
+
+    try {
+      const activeProposal =
+        selectedProposal?.proposal || proposalVersions[0]?.proposal || null;
+
+      const { filename, dataUri } = buildProposalPdf({
+        sessionId,
+        proposal: activeProposal,
+        requirements: structuredOutput.requirements,
+        risks: structuredOutput.risks,
+        missingInfo: structuredOutput.missingInfo,
+        suggestions: structuredOutput.suggestions,
+      });
+      const anchor = document.createElement("a");
+      anchor.href = dataUri;
+      anchor.download = filename;
+      anchor.click();
+
+      if (activeProposal) {
+        const artifact = {
+          id: `pdf-${sessionId || Date.now()}`,
+          label: "Meeting Proposal PDF",
+          action: "meeting_pdf",
+          proposal: activeProposal,
+          createdAt: new Date().toISOString(),
+          pdfName: filename,
+          pdfDataUri: dataUri,
+        };
+        const next = upsertStoredProposal(artifact);
+        setProposalVersions(next);
+        setSelectedProposalId(artifact.id);
+      }
+
+      setConversation((curr) => [
+        ...curr,
+        createMessage(
+          "assistant",
+          `Proposal deck generated successfully as ${filename}.`
+        ),
+      ]);
+      setAgentState((curr) => ({
+        ...curr,
+        status: "idle",
+        action: "pdf_complete",
+        thought: "Proposal deck ready for sharing.",
+      }));
+    } catch (error) {
+      setConversation((curr) => [
+        ...curr,
+        createMessage(
+          "assistant",
+          error.message || "Failed to generate proposal PDF."
+        ),
+      ]);
+      setAgentState((curr) => ({
+        ...curr,
+        status: "error",
+        action: "pdf_error",
+        thought: "Unable to compile the proposal deck.",
+      }));
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function sendMessage(rawMessage) {
@@ -202,6 +271,7 @@ export function useAgentSession() {
               ...current,
             ];
 
+            upsertStoredProposal(nextVersions[0]);
             setSelectedProposalId(nextVersions[0].id);
 
             return nextVersions;
@@ -245,7 +315,7 @@ export function useAgentSession() {
     setActiveScenario(scenario.id);
     sessionIdRef.current = "";
     setSessionId("");
-    setProposalVersions([]);
+    setProposalVersions(loadStoredProposals());
     setSelectedProposalId("");
     setStructuredOutput({
       requirements: {},

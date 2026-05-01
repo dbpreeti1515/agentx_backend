@@ -6,6 +6,7 @@ export function MeetingTranscript({
   onSend,
   onSpeakerChange,
   speakerRole,
+  showSpeakerToggle = true,
 }) {
   function handleSubmit(event) {
     event.preventDefault();
@@ -42,24 +43,26 @@ export function MeetingTranscript({
       </div>
 
       <form className="composer" onSubmit={handleSubmit}>
-        <div className="role-toggle">
-          <button
-            type="button"
-            className={speakerRole === "client" ? "role-toggle__button role-toggle__button--active" : "role-toggle__button"}
-            onClick={() => onSpeakerChange("client")}
-            disabled={isLoading}
-          >
-            Client
-          </button>
-          <button
-            type="button"
-            className={speakerRole === "sales" ? "role-toggle__button role-toggle__button--active" : "role-toggle__button"}
-            onClick={() => onSpeakerChange("sales")}
-            disabled={isLoading}
-          >
-            Sales
-          </button>
-        </div>
+        {showSpeakerToggle ? (
+          <div className="role-toggle">
+            <button
+              type="button"
+              className={speakerRole === "client" ? "role-toggle__button role-toggle__button--active" : "role-toggle__button"}
+              onClick={() => onSpeakerChange("client")}
+              disabled={isLoading}
+            >
+              Client
+            </button>
+            <button
+              type="button"
+              className={speakerRole === "sales" ? "role-toggle__button role-toggle__button--active" : "role-toggle__button"}
+              onClick={() => onSpeakerChange("sales")}
+              disabled={isLoading}
+            >
+              Sales
+            </button>
+          </div>
+        ) : null}
 
         <textarea
           value={draftMessage}

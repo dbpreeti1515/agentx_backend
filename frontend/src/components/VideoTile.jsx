@@ -3,10 +3,23 @@ import { User, MicOff } from "lucide-react";
 
 export function VideoTile({ peer, stream, label, isLocal = false, isMuted = false }) {
   const videoRef = useRef();
+  const videoTracks = stream?.getVideoTracks?.() || [];
+  const hasEnabledVideo = videoTracks.some(
+    (track) => track.enabled && track.readyState === "live"
+  );
+  const showFallback = !stream || !hasEnabledVideo;
+  const normalizedLabel =
+    isLocal && (label || "").toLowerCase().includes("you")
+      ? label
+      : `${label || "Participant"}${isLocal ? " (You)" : ""}`;
 
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
+      const playPromise = videoRef.current.play?.();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
     }
   }, [stream]);
 
@@ -18,11 +31,19 @@ export function VideoTile({ peer, stream, label, isLocal = false, isMuted = fals
         autoPlay
         playsInline
         muted={isLocal || isMuted}
-        className={`w-full h-full object-cover ${isLocal ? 'scale-x-[-1]' : ''}`}
+        onLoadedMetadata={() => {
+          const playPromise = videoRef.current?.play?.();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {});
+          }
+        }}
+        className={`w-full h-full object-cover ${isLocal ? 'scale-x-[-1]' : ''} ${
+          showFallback ? "opacity-0" : "opacity-100"
+        }`}
       />
       
-      {/* Fallback (if no stream active - simulated) */}
-      {!stream && (
+      {/* Fallback avatar for camera-off/no-video */}
+      {showFallback && (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-slate-500 border border-white/5 shadow-inner">
              <User size={40} />
@@ -34,7 +55,7 @@ export function VideoTile({ peer, stream, label, isLocal = false, isMuted = fals
       <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-2">
           <div className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
-            {label || "Participant"} {isLocal && "(You)"}
+            {normalizedLabel}
           </div>
         </div>
         

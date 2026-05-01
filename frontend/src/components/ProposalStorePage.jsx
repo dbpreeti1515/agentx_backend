@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, FolderOpen, CalendarDays, ArrowRight } from "lucide-react";
+import { FileText, FolderOpen, CalendarDays, ArrowRight, Download } from "lucide-react";
 
 function formatDate(value) {
   if (!value) {
@@ -23,6 +23,16 @@ export function ProposalStorePage({
     proposalVersions.find((item) => item.id === selectedProposalId) ||
     proposalVersions[0] ||
     null;
+
+  function downloadPdf(proposal) {
+    if (!proposal?.pdfDataUri) {
+      return;
+    }
+    const anchor = document.createElement("a");
+    anchor.href = proposal.pdfDataUri;
+    anchor.download = proposal.pdfName || `${proposal.label || "proposal"}.pdf`;
+    anchor.click();
+  }
 
   return (
     <div className="space-y-8">
@@ -118,6 +128,16 @@ export function ProposalStorePage({
               {selectedProposal?.action || "generated"} |{" "}
               {formatDate(selectedProposal?.createdAt)}
             </p>
+            {selectedProposal?.pdfDataUri ? (
+              <button
+                type="button"
+                onClick={() => downloadPdf(selectedProposal)}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 text-white px-3 py-2 text-xs font-bold"
+              >
+                <Download size={14} />
+                Download PDF
+              </button>
+            ) : null}
             <pre className="mt-6 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-[460px] overflow-y-auto">
               {selectedProposal?.proposal?.proposalText ||
                 "No proposal text available for this version."}

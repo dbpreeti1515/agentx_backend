@@ -19,6 +19,43 @@ const emptyRequirements = {
   knownFacts: [],
 };
 
+function buildFallbackRequirements(messages = [], currentRequirements = {}) {
+  const base = { ...emptyRequirements, ...(currentRequirements || {}) };
+  const visibleMessages = (messages || [])
+    .filter((message) => {
+      const content = String(message?.content || "").trim();
+      if (!content) {
+        return false;
+      }
+      const speaker = String(
+        message?.metadata?.speaker || message?.metadata?.sourceRole || message?.role || ""
+      ).toLowerCase();
+      if (!["sales", "client", "user"].includes(speaker)) {
+        return false;
+      }
+      return true;
+    })
+    .slice(-8);
+
+  if (!visibleMessages.length) {
+    return base;
+  }
+
+  const lastLines = visibleMessages.map((message) => String(message.content).trim());
+  const latestMessage = lastLines[lastLines.length - 1] || "";
+  const projectSummary =
+    base.projectSummary ||
+    (latestMessage.length > 180 ? `${latestMessage.slice(0, 177)}...` : latestMessage);
+
+  const knownFacts = Array.from(new Set([...(base.knownFacts || []), ...lastLines])).slice(-10);
+
+  return {
+    ...base,
+    projectSummary,
+    knownFacts,
+  };
+}
+
 function mergeRequirements(existing, extracted) {
   const base = { ...emptyRequirements, ...(existing || {}) };
   const incoming = { ...emptyRequirements, ...(extracted || {}) };
@@ -57,7 +94,12 @@ async function extractRequirements({ messages, currentRequirements }) {
 
   const result = await callStructuredLLM({
     prompt,
-    fallback: emptyRequirements,
+    fallback: () => buildFallbackRequirements(messages, currentRequirements),
+    retries: 1,
+    options: {
+      maxRetries: 1,
+      maxTokens: 900,
+    },
     validate: (payload) =>
       validateKeys(payload, [
         "projectSummary",

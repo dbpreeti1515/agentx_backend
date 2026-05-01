@@ -24,6 +24,8 @@ function sanitizeMeetingSummary(meeting) {
     scheduledAt: meeting.scheduledAt || null,
     startedAt: meeting.startedAt || null,
     completedAt: meeting.completedAt || null,
+    createdAt: meeting.createdAt || null,
+    updatedAt: meeting.updatedAt || null,
     joinLink: buildJoinLink(meeting.meetingId),
     dashboardLink: buildDashboardLink(meeting.meetingId),
     participantCount: (meeting.participants || []).length,

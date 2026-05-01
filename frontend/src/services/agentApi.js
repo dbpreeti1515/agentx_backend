@@ -127,6 +127,22 @@ export async function fetchMeetingState({ meetingId, role, participantName }) {
   return data.data;
 }
 
+export async function finalizeMeeting(meetingId) {
+  const response = await fetch(`${API_BASE_URL}/api/meeting/${meetingId}/finalize`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data?.error?.message || "Failed to finalize meeting");
+  }
+
+  return data.data;
+}
+
 export async function loginUser(credentials) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",

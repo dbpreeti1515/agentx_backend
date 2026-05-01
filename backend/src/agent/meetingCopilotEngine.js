@@ -7,15 +7,49 @@ const { reviseProposal } = require("../tools/reviseProposal");
 const { calculateConfidence } = require("./confidenceEngine");
 const logger = require("../services/logger");
 
+function isOperationalSystemMessage(message = {}) {
+  if (message.role !== "system") {
+    return false;
+  }
+  const text = String(message.content || "").toLowerCase();
+  return (
+    text.includes("meeting started") ||
+    text.includes("enabling camera") ||
+    text.includes("unable to access camera")
+  );
+}
+
+function resolveSpeaker(message = {}) {
+  if (message.metadata?.senderName) {
+    return message.metadata.senderName;
+  }
+  if (message.role === "sales") {
+    return "Sales";
+  }
+  if (message.role === "client") {
+    return "Client";
+  }
+  return "System";
+}
+
 function visibleConversation(messages = []) {
-  return messages.map((message) => ({
-    role: "user",
-    content: message.content,
-    metadata: {
-      speaker: message.role,
-      visibility: "shared",
-    },
-  }));
+  return messages
+    .filter((message) => message?.content && !isOperationalSystemMessage(message))
+    .slice(-24)
+    .map((message) => {
+      const speaker = resolveSpeaker(message);
+      const sourceRole = message.role || "system";
+      return {
+        role: "user",
+        content: String(message.content || "").trim(),
+        metadata: {
+          speaker,
+          sourceRole,
+          visibility: "shared",
+          createdAt: message.createdAt || null,
+        },
+      };
+    });
 }
 
 function decideMeetingAction({ requirements, gapPayload, riskPayload, confidence, proposalDraft }) {

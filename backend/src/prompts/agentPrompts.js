@@ -4,14 +4,15 @@ function formatConversation(messages = []) {
   }
 
   return messages
-    .slice(-12)
+    .slice(-20)
     .map((message) => {
-      const speaker =
-        message.metadata?.speaker ||
-        message.metadata?.visibility ||
-        message.role;
-
-      return `${String(speaker).toUpperCase()}: ${message.content}`;
+      const speaker = message.metadata?.speaker || message.role || "unknown";
+      const sourceRole = message.metadata?.sourceRole || message.role || "unknown";
+      const createdAt = message.metadata?.createdAt
+        ? new Date(message.metadata.createdAt).toISOString()
+        : "";
+      const timePrefix = createdAt ? `[${createdAt}] ` : "";
+      return `${timePrefix}${String(speaker)} (${String(sourceRole).toUpperCase()}): ${message.content}`;
     })
     .join("\n");
 }
@@ -142,6 +143,8 @@ Return valid JSON only with this exact shape:
 Rules:
 - Write a realistic proposal based only on available information.
 - If budget is unknown, state pricing as a custom quote with clear assumptions.
+- Do not block proposal generation due to incomplete details; proceed with best-effort assumptions.
+- Put unknowns explicitly in the assumptions and nextSteps sections.
 - proposalText should be polished markdown suitable to send to a customer.
 - Keep the content commercially useful and specific.
 `.trim();
@@ -192,6 +195,7 @@ Return valid JSON only with this exact shape:
 Rules:
 - Revise the proposal to address budget constraints, reduced scope, or phased delivery.
 - Keep the proposal commercially credible and client-friendly.
+- Keep the proposal moving forward with assumptions where inputs remain incomplete.
 - revisionNotes should clearly describe what changed.
 `.trim();
 }

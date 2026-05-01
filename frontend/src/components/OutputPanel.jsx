@@ -18,7 +18,8 @@ export function OutputPanel({
   suggestions = [],
   proposalVersions = [],
   selectedProposalId,
-  onSelectProposal
+  onSelectProposal,
+  onGenerateProposalPdf
 }) {
   const sections = [
     { title: 'Requirements', data: requirements, icon: ClipboardCheck, color: 'indigo' },
@@ -39,7 +40,11 @@ export function OutputPanel({
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Deal Artifacts</p>
           </div>
         </div>
-        <button className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+        <button
+          type="button"
+          onClick={onGenerateProposalPdf}
+          className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+        >
           <Plus size={14} />
           Gen Proposal
         </button>
